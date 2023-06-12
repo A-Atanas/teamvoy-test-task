@@ -1,18 +1,27 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import MainMenu from './components/MainMenu';
+import ArticleScreen from './components/ArticleScreen';
+import { StackNavigatorRoutes } from './types/types';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-    </View>
-  );
-}
+const Stack = createNativeStackNavigator<StackNavigatorRoutes>();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const App = () => {
+
+	return (
+		<NavigationContainer>
+			<Stack.Navigator>
+				<Stack.Screen 
+					name="Main menu"
+					component={MainMenu}
+				/>
+				<Stack.Screen 
+					name="Article"
+					component={ArticleScreen}
+				/>
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+};
+
+export default App;
