@@ -20,7 +20,16 @@ export type ApiResponse = {
 	articles: ArticleData[];
 } & Response;
 
-export type StackNavigatorRoutesAndParams = {
+export type AppRoutesAndParams = {
 	"Main menu": undefined;
 	Article: { data: ArticleData };
 };
+
+export type ArticleScreenProps = NativeStackScreenProps<
+	AppRoutesAndParams,
+	"Article"
+>;
+export type MainMenuProps = NativeStackScreenProps<
+	AppRoutesAndParams,
+	"Main menu"
+>;

@@ -1,40 +1,138 @@
-import { FlatList, StyleSheet, View } from "react-native";
-import { useState, useEffect } from "react";
+import {
+	Button,
+	FlatList,
+	Modal,
+	TextInput,
+	TouchableOpacity,
+	View,
+	Text,
+	KeyboardAvoidingView,
+} from "react-native";
+import RadioGroup from "react-native-radio-buttons-group";
+import React, { useState, useEffect } from "react";
 import moment from "moment";
-import { ArticleData, ApiResponse } from "../types/types";
+import { ArticleData, MainMenuProps } from "../types/types";
+import { mainMenuStyles, headerButtons } from "../styles/styles";
 import ArticleCard from "./ArticleCard";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+	faMagnifyingGlass,
+	faArrowDownAZ,
+} from "@fortawesome/free-solid-svg-icons";
+import fetchArticles from "../services/fetchArticles";
 
-const API_URL =
-	"https://newsapi.org/v2/everything?apiKey=840b827d1e1d4dd6b6dcf68025c8cad0&q=bitcoin";
+const sortOptions = [
+	{
+		id: "1",
+		label: "Relevancy",
+		value: "relevancy",
+	},
+	{
+		id: "2",
+		label: "Popularity",
+		value: "popularity",
+	},
+	{
+		id: "3",
+		label: "Publication date",
+		value: "publishedAt",
+	},
+];
 
-const MainMenu = ({navigation}) => {
+const MainMenu = () => {
+	const navigation = useNavigation<MainMenuProps["navigation"]>();
+
 	let [articles, setArticles] = useState<ArticleData[]>([]);
+	const [searchVisible, setSearchVisible] = useState(false);
+	const [sortVisible, setSortVisible] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("bitcoin");
+	const [sortBy, setSortBy] = useState("1");
+
+	const updateArticles = () => {
+		fetchArticles(
+			searchQuery,
+			sortOptions.find((option) => option.id === sortBy).value
+		).then(({ articles }) => setArticles(articles));
+	};
+
+	const boundHeader = (
+		<View style={headerButtons.buttonsView}>
+			<TouchableOpacity
+				style={headerButtons.button}
+				onPress={() => setSortVisible(true)}
+			>
+				<FontAwesomeIcon icon={faArrowDownAZ} />
+			</TouchableOpacity>
+			<TouchableOpacity
+				style={headerButtons.button}
+				onPress={() => setSearchVisible(true)}
+			>
+				<FontAwesomeIcon icon={faMagnifyingGlass} />
+			</TouchableOpacity>
+		</View>
+	);
 
 	useEffect(() => {
-		fetch(API_URL)
-			.then((result) => result.json())
-			.then((json: ApiResponse) => setArticles(json.articles))
-			.catch((error) => console.log(error));
-	});
+		updateArticles();
+
+		navigation.setOptions({
+			headerRight: () => boundHeader,
+		});
+	}, []);
 
 	return (
-		<View style={styles.container}>
+		<View style={mainMenuStyles.container}>
 			<FlatList
 				data={articles}
-				renderItem={({ item }) => <ArticleCard data={item}/>}
+				renderItem={({ item }) => <ArticleCard data={item} />}
 				keyExtractor={(item) => moment(item.publishedAt).format("x")}
 			/>
+			<Modal
+				animationType="slide"
+				visible={searchVisible}
+				onRequestClose={() => setSearchVisible(false)}
+			>
+				<KeyboardAvoidingView style={mainMenuStyles.modal}>
+					<Text>What articles are you looking for?</Text>
+					<TextInput
+						style={mainMenuStyles.modalTextInput}
+						onChangeText={setSearchQuery}
+						value={searchQuery}
+					/>
+					<Button
+						onPress={() => {
+							updateArticles();
+							setSearchVisible(false);
+						}}
+						title="Search"
+					/>
+				</KeyboardAvoidingView>
+			</Modal>
+			<Modal
+				animationType="slide"
+				visible={sortVisible}
+				onRequestClose={() => setSortVisible(false)}
+			>
+				<View style={mainMenuStyles.modal}>
+					<Text>How to sort articles?</Text>
+					<RadioGroup
+						containerStyle={mainMenuStyles.modalRadio}
+						radioButtons={sortOptions}
+						onPress={setSortBy}
+						selectedId={sortBy}
+					/>
+					<Button
+						onPress={() => {
+							updateArticles();
+							setSortVisible(false);
+						}}
+						title="Sort"
+					/>
+				</View>
+			</Modal>
 		</View>
 	);
 };
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-});
 
 export default MainMenu;

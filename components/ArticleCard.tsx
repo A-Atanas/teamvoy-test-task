@@ -1,9 +1,7 @@
-import { ArticleData, StackNavigatorRoutesAndParams } from "../types/types";
-import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { ArticleData, ArticleScreenProps } from "../types/types";
+import { articleStyles } from "../styles/styles";
+import { Text, TouchableHighlight, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-type ArticleScreenProps = NativeStackScreenProps<StackNavigatorRoutesAndParams, "Article">;
 
 const ArticleCard = ({ data }: { data: ArticleData }) => {
 	const navigation = useNavigation<ArticleScreenProps["navigation"]>();
@@ -11,7 +9,7 @@ const ArticleCard = ({ data }: { data: ArticleData }) => {
 	return (
 		<TouchableHighlight
 			style={articleStyles.articleCard}
-			onPress={() => navigation.navigate("Article")}
+			onPress={() => navigation.navigate("Article", {data})}
 		>
 			<View>
 				<Text style={articleStyles.articleTitle}>{data.title}</Text>
@@ -20,18 +18,5 @@ const ArticleCard = ({ data }: { data: ArticleData }) => {
 		</TouchableHighlight>
 	);
 };
-
-const articleStyles = StyleSheet.create({
-	articleCard: {
-		borderBottomWidth: 1,
-		borderBottomColor: "#aaa",
-		padding: 12,
-	},
-	articleTitle: {
-		fontSize: 16,
-		fontWeight: "bold",
-		marginBottom: 12,
-	},
-});
 
 export default ArticleCard;
